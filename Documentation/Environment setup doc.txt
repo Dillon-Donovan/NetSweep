@@ -1,0 +1,29 @@
+Check Python version:
+py -m version
+
+Check pip version:
+py -m pip --version
+
+Update pip:
+py -m pip install --upgrade pip setuptools wheel
+
+Before installing scapy install NPcap (windows):
+https://npcap.com/#download
+
+Install scapy:
+py -m pip install scapy
+
+Install matplotlib:
+py -m pip install matplotlib
+
+Install vpython:
+py -m pip install vpython
+
+Install PyQt5:
+py -m pip install PyQt5
+
+To test scapy is working run this command in an admin cmd
+scapy
+and you should see the green S logo appear
+
+(Tip dont forget to set python path in the bottom right of vscode)
