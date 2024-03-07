@@ -9,8 +9,9 @@ from PyQt5 import *
 
 def sniffer(time,packetAmount=0):
     result = sniff(count=packetAmount,store=True,timeout=time)
-    print("\nPackets sniffed:")
-    result.summary()
+    #print("\nPackets sniffed:")
+    #result.summary()
+    return result
 
 
 
@@ -47,18 +48,13 @@ def findOpenPort(destinationIP,lower=0,upper=65535):
     #Below will filter to only the open ports
     #ans.summary(lfilter = lambda s,r: r.sprintf("%TCP.flags%") == "SA",prn=lambda s,r: r.sprintf("%TCP.sport% is open"))
 
-def main():
-
+#def main():
     #getGateway() test
-    myGateway = getGateway()
-    print(("Current gateway is"), myGateway)
+    #myGateway = getGateway()
+    #print(("Current gateway is"), myGateway)
 
     #findOpenPort() test //findOpenPort(%DestinationIP%,%LowerBound%,%UpperBound%) //Defaults - [%LowerBound% = 0],[%UpperBound% = 65535(all ports)]
-    findOpenPort(myGateway,0,5000)
+    #findOpenPort(myGateway,0,5000)
 
     #sniffer() test //sniffer(%Time%,%PacketLimit%) //Defaults - [%PacketLimit% = 0(infinite)]
-    sniffer(5,5)
-
-
-if __name__ == "__main__":
-    main()
+    #sniffer(5,5)
