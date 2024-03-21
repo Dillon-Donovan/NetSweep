@@ -58,8 +58,8 @@ class NetSweepGUI(QWidget):
         self.sniffButton.clicked.connect(self.handle_sniffButton)
         layout.addWidget(self.sniffButton)
 
-        #Button 2
-        button2 = QPushButton("Button 2")
+        #Button 2 -- Subnet Test
+        button2 = QPushButton("Subnet Test - IP Scan")
         layout.addWidget(button2)
 
         #Button 3
@@ -100,6 +100,8 @@ class NetSweepGUI(QWidget):
         self.sniffButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
         self.thread.finished.connect(lambda: self.sniffButton.setEnabled(True))
         self.thread.finished.connect(lambda: self.sniffButton.setStyleSheet(""))
+
+
 
     #Setter function for main display
     def set_mainDisplay(self, string):
