@@ -1,0 +1,34 @@
+Tabs Layout for GUI:
+
+First Tab - Basic Functions:
+- IP Scan (cmd: ipconfig /all)
+- ICMP Ping function (try to ping 8.8.8.8)
+- ARP Ping
+- DNS Request
+- Public IP - DNS Lookup
+- Network Scan
+
+
+
+Second Tab - Advanced Functions:
+- Sniffer
+- TCP Port Scanning
+- TCP Traceroute
+- DNS traceroute
+
+
+Third Tab - Attacks:
+- Malformed packets
+- Ping of Death
+- Nestea attack
+- Land attack
+- ARP cache poisoning
+
+(third tab could just contain two of these)
+
+
+Extra Functions to add if time allows:
+- Traceroute 2D graph representation
+- 3D representation of the Traceroute
+- Converting a packet into a binary string
+- 
