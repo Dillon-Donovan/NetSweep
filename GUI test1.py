@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from scapy.all import *
 import sys
 import os
+import string
 
 #Subthread for running longer process (May need to add more depends on how execution of final product works)
 class Worker(QObject):
@@ -13,29 +14,72 @@ class Worker(QObject):
     def get_sniff(self):
         sniffedPackets = sniffer(3)
         formatedText = packet_group_to_string(sniffedPackets)
-        output = (str(sniffedPackets) + "\n" + formatedText)
+        summary = str(sniffedPackets)
+        summary = summary.replace("<","&lt;").replace(">","&gt;")
+        output = (summary + formatedText)
         self.packetInfo.emit(output)
         self.finished.emit()
 
+class CustomTextBrowser(QTextBrowser):
+    def __init__(self, parent=None):
+        super(CustomTextBrowser, self).__init__(parent)
 
+        #self.createWindow = pyqtSignal()
+
+        def anchorClicked(self, url):
+            print(url)
+            print("Poopie")
+            if url.startswith("open"):
+                new_window = PacketInspectionWindow()
+                new_window.show()
+            else:
+                print("Go fuckin die idiot")
+                super(CustomTextBrowser, self).anchorClicked(url)
+
+class PacketInspectionWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+            
+        dialog = QDialog(self)
+        dialog.setWindowTitle('New Window')
+        
+        layout = QVBoxLayout()
+        
+        label = QLabel('You opened a new window!')
+        layout.addWidget(label)
+        
+        button = QPushButton('Close')
+        button.clicked.connect(dialog.close)
+        layout.addWidget(button)
+        
+        container = QWidget()
+        container.setLayout(layout)
+        
+        dialog.setModal(True)
+        dialog.setFixedSize(200, 100)
+        dialog.setLayout(layout)
+        
+        dialog.show()
+
+#########################################################################################
+#Main GUI ->
+#########################################################################################
 class NetSweepGUI(QWidget):
     def __init__(self):
         super().__init__()
 
-#########################################################################################
-#Functions used to create gui ->
-#########################################################################################
         #Creating and naming main display
         self.setWindowTitle("NetSweep")
         self.setGeometry(100, 100, 600, 300)
         layout = QVBoxLayout()
 
         #First text display widget
-        self.mainDisplay = QTextEdit()
+        self.mainDisplay = CustomTextBrowser()
         self.mainDisplay.setStyleSheet("background-color: #191A2C; color: white; border-color: #B58800; border-width: 3px")
         self.mainDisplay.setFixedHeight(225)
         self.mainDisplay.setFixedWidth(1150)
         self.mainDisplay.setReadOnly(True)
+        self.mainDisplay.anchorClicked.connect(PacketInspectionWindow)
         layout.addWidget(self.mainDisplay)
         
         #WORKING ON THIS
@@ -76,13 +120,18 @@ class NetSweepGUI(QWidget):
         
     #Setter function for main display
     def set_mainDisplay(self, string):
-        self.mainDisplay.insertPlainText(string)
+        self.mainDisplay.setHtml(string)
+
+    #New window on text click
+    def open_window(self):
+        new_window = PacketInspectionWindow()
+        new_window.show()
 
 #########################################################################################
-#Supporting functions ->
+#Custom widgets ->
 #########################################################################################
 
-#WORKING ON THIS
+
 class MyTabWidget(QWidget):
     
     def __init__(self, parent):
@@ -113,11 +162,9 @@ class MyTabWidget(QWidget):
         # Add tabs to widget
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
-        
+
+    #Handler for the sniff button(creates and uses worker thread)
     def handle_sniffButton(self):
-        #Setting placeholder text
-        #self.emit("Sniffing packets...\n")
-        #functionStartSignal = pyqtSignal(String)
 
         #Create a Qthread and worker obj
         self.thread = QThread()
@@ -139,13 +186,15 @@ class MyTabWidget(QWidget):
         self.thread.start()
         self.sniffButton.setEnabled(False)
         self.sniffButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
-        
 
-#Function that converts a packet object to string
+#########################################################################################
+#Supporting functions
+#########################################################################################
+#Converts a packet object to string
 def packet_group_to_string(packetGroup):
     string =""
     count = 0
-    spacing = "     "
+    spacing = "    "
     for packet in packetGroup:
         count = count + 1
         if(count == 10):
@@ -154,28 +203,24 @@ def packet_group_to_string(packetGroup):
             spacing = "  "
         if(count == 1000):
             spacing = " "
-        string = string + str(count) + spacing + str(packet.summary()) + "\n"
-    return string + "\n"
+        string = string + "<a href='www.google.com'>" + str(count) + "</a>" + spacing + str(packet.summary()) + "<br>"
+    return string
 
+#Main function(Launches GUI)
 def main():
     #Get the path to the QSS file (stylesheet)
     qss_file = os.path.join(os.path.dirname(__file__), "style.qss")
-
     #Load the QSS file
     with open(qss_file, "r") as f:
         style = f.read()
-
     #Create app obj
     app = QApplication(sys.argv)
-
     #Apply the style
     app.setStyleSheet(style)
-
     #Initialize window
     window = NetSweepGUI()
     window.show()
     sys.exit(app.exec_())
-
 #Run main
 if __name__ == "__main__":
     main()

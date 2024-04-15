@@ -1,8 +1,6 @@
 from scapy.all import *
 from sys import *
 #from vpython import *
-from PyQt5 import *
-
 #def pingTest():
 
 
@@ -12,7 +10,6 @@ def sniffer(time,packetAmount=0):
     #print("\nPackets sniffed:")
     #result.summary()
     return result
-
 
 
 def getGateway():
