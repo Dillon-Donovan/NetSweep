@@ -5,7 +5,44 @@ from PyQt5 import *
 
 #def pingTest():
 
+#DNS Requests
+ans = sr1(IP(dst="8.8.8.8")/UDP(sport=RandShort(), dport=53)/DNS(rd=1,qd=DNSQR(qname="secdev.org",qtype="A")))
+print(ans.an[0].rdata)
 
+#for troubleshooting misconfigurations with DNS and DNS cache poisoning attacks
+def dns_lookup(domain="myip.opendns.com", dns_server="resolver1.opendns.com"):
+    # Create DNS query packet
+    query_packet = IP(dst=dns_server) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=domain))
+
+    # Send DNS query and receive response
+    response = sr1(query_packet, verbose=False)
+
+    # Processing response
+    if response and response.haslayer(DNS):
+        for answer in response[DNS].an:
+            if answer.type == 1:  # IPv4 address record
+                print("IP Address:", answer.rdata)
+    else:
+        print("DNS query failed or no response received")
+
+def scan_subnet(subnet = conf.route.route("0.0.0.0")[2]):
+    # Define the network range to scan
+    ip_range = subnet + "/24"
+
+    # Initialize an empty list to store live hosts
+    live_hosts = []
+
+    # Craft ARP request packet
+    arp_request = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip_range)
+
+    # Send and receive packets
+    ans, _ = srp(arp_request, timeout=2, verbose=False)
+
+    # Process responses
+    for sent, received in ans:
+        live_hosts.append(received)
+
+    return live_hosts
 
 def sniffer(time,packetAmount=0):
     result = sniff(count=packetAmount,store=True,timeout=time)

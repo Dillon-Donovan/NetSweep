@@ -3,18 +3,19 @@ QWidget {
     font-family: Arial, sans-serif;
 }
 
-QTextEdit {
-    background-color: black;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 5px;
+QTextBrowser {
+    background-color: #191A2C;
+    color: white;
+    border: 3px solid #B58800;
+    padding: 3px
 }
 
 QPushButton {
-    background-color: #2EA732; /* Green */
-    border: 2px solid black;
-    color: black;
-    padding: 10px 24px;
+    background-color: #0056B3;
+    color: #FFFFFF;
+    border: 4px solid #002145; 
+    border-radius: 5px; 
+    padding: 5px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
