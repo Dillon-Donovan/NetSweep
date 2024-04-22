@@ -116,6 +116,7 @@ class MyTabWidget(QWidget):
         self.frame = QFrame(self)
         self.frame.setObjectName("inputBox")
         self.frame.setFixedHeight(115)
+
         #ICMP Layout
         self.inputLayout = QHBoxLayout()
         self.togetherLayout = QVBoxLayout()
@@ -133,10 +134,15 @@ class MyTabWidget(QWidget):
         self.inputFont.setItalic(True)
         self.icmpPingButtonInput.setFont(self.inputFont)
         self.inputLayout.addWidget(self.icmpPingButtonInput)
+
+
+        self.setLayout(self.layout)
+
         #Combining Layouts
         self.togetherLayout.addLayout(self.inputLayout)
         self.frame.setLayout(self.togetherLayout)
         self.tab1.layout.addWidget(self.frame)
+
         
 
         #Add tabs to widget
@@ -176,6 +182,12 @@ class MyTabWidget(QWidget):
         worker.signals.result.connect(self.parent().set_mainDisplay)
         worker.signals.finished.connect(lambda: self.icmpPingButton.setEnabled(True))
         worker.signals.finished.connect(lambda: self.icmpPingButton.setStyleSheet(""))
+
+        #Start thread
+        self.parent().threadpool.start(worker)
+        self.icmpPingButton.setEnabled(False)
+        self.icmpPingButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
+        worker.signals.finished.connect(lambda: self.icmpPingButton.setText("Ping Test"))
 
         #Start thread
         self.parent().threadpool.start(worker)

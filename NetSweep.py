@@ -41,6 +41,45 @@ def icmp_ping(ipAddress = getGateway()):
         pingOutput.append(recieved)
     return pingOutput
 
+#TCP Traceroute Function
+def tcp_traceroute(default="www.google.com"):
+    try:
+        # Perform traceroute
+        tcp_result, _ = traceroute(default, maxttl=20, l4=TCP(sport=RandShort()))
+
+        # Format the traceroute results into a string
+        tcp_output = ""
+        for _, result in tcp_result:
+            ip = result[IP].src
+            tcp_output += f"Hop: {ip}\n"
+
+        return tcp_output
+    except Exception as e:
+        return f"Error: {str(e)}"
+    
+
+# ARP Monitor uses two functions, one for callback
+def arp_monitor():
+    arp_results = []
+
+    # Callback function to process ARP packets
+    def callback(pkt):
+        if ARP in pkt and pkt[ARP].op in (1, 2):  # who-has or is-at
+            arp_results.append(pkt.sprintf("%ARP.hwsrc% sends ARP request to %ARP.pdst%"))
+            print(pkt.sprintf("%ARP.hwsrc% sends ARP request to %ARP.pdst%"))  # Print each request as it comes
+
+    # Sniff ARP packets until 3 requests are captured
+    while len(arp_results) < 3:
+        sniff(prn=callback, filter="arp", count=1)
+        #print("\n")  # newline -- may not need
+
+    return arp_results
+
+    # Convert the result to a string
+    tcp_output = "\n".join(tcp_result.show(dump=True))
+    return tcp_output
+
+#Scan Subnet Function
 def scan_subnet(subnet = getGateway()):
     #Define the network range to scan
     ip_range = subnet + "/24"
@@ -56,7 +95,7 @@ def scan_subnet(subnet = getGateway()):
     for sent, received in ans:
         live_hosts.append(received)
     return live_hosts
-
+    
 def sniffer(time,packetAmount=0):
     result = sniff(count=packetAmount,store=True,timeout=time)
     return result
