@@ -11,12 +11,12 @@ import socket
 #print(ans.an[0].rdata)
 
 #For troubleshooting misconfigurations with DNS and DNS cache poisoning attacks
-def dns_lookup(domain="myip.opendns.com", dns_server="resolver1.opendns.com"):
+def dns_lookup(domain="myip.opendns.com", dns_server="resolver1.opendns.com", timeout = 10):
     #Create DNS query packet
     query_packet = IP(dst=dns_server) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=domain))
 
     #Send DNS query and receive response
-    response = sr1(query_packet, verbose=False)
+    response = sr1(query_packet, timeout=timeout, verbose=False)
 
     #Processing response
     if response and response.haslayer(DNS):
@@ -28,23 +28,20 @@ def dns_lookup(domain="myip.opendns.com", dns_server="resolver1.opendns.com"):
     return response
 
 #Public IP function
-def public_ip(domain, dns_server="resolver1.opendns.com"):
+def public_ip(domain = "myip.opendns.com", dns_server="resolver1.opendns.com", timeout=10):
     # Create DNS query packet
     query_packet = IP(dst=dns_server) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=domain))
 
-    # Send DNS query and receive response
-    response = sr1(query_packet, verbose=False)
+    # Send DNS query and receive response with a timeout
+    response = sr1(query_packet, timeout=timeout, verbose=False)
 
     # Processing response
     if response and response.haslayer(DNS):
-        print("Domain:", domain)
         for answer in response[DNS].an:
             if answer.type == 1:  # IPv4 address record
-                print("IP Address:", answer.rdata)
+                return answer.rdata
     else:
-        print("DNS query failed or no response received")
-
-    return public_ip("myip.opendns.com")
+        return None
 
 def getGateway():
     defaultGateway = conf.route.route("0.0.0.0")[2]
@@ -98,7 +95,7 @@ def scan_subnet(subnet = getGateway()):
     ip_range = subnet + "/24"
     live_hosts = []
 
-    #Craft ARP packet
+    #Create ARP packet
     arp_request = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=ip_range)
 
     #Send packets

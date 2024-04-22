@@ -24,4 +24,4 @@ def dns_lookup(domain, dns_server="resolver1.opendns.com"):
         print("DNS query failed or no response received")
 
 # example:
-# dns_lookup("myip.opendns.com")
+print (dns_lookup("myip.opendns.com"))
