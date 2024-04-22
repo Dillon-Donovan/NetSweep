@@ -27,6 +27,25 @@ def dns_lookup(domain="myip.opendns.com", dns_server="resolver1.opendns.com"):
         print("DNS query failed or no response received")
     return response
 
+#Public IP function
+def public_ip(domain, dns_server="resolver1.opendns.com"):
+    # Create DNS query packet
+    query_packet = IP(dst=dns_server) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=domain))
+
+    # Send DNS query and receive response
+    response = sr1(query_packet, verbose=False)
+
+    # Processing response
+    if response and response.haslayer(DNS):
+        print("Domain:", domain)
+        for answer in response[DNS].an:
+            if answer.type == 1:  # IPv4 address record
+                print("IP Address:", answer.rdata)
+    else:
+        print("DNS query failed or no response received")
+
+    return public_ip("myip.opendns.com")
+
 def getGateway():
     defaultGateway = conf.route.route("0.0.0.0")[2]
     return defaultGateway
@@ -41,7 +60,6 @@ def icmp_ping(ipAddress = getGateway()):
         pingOutput.append(recieved)
     return pingOutput
 
-#TCP Traceroute Function
 def tcp_traceroute(default="www.google.com"):
     try:
         # Perform traceroute
@@ -56,9 +74,8 @@ def tcp_traceroute(default="www.google.com"):
         return tcp_output
     except Exception as e:
         return f"Error: {str(e)}"
-    
 
-# ARP Monitor uses two functions, one for callback
+# ARP Monitor uses two functions, one extra for callback
 def arp_monitor():
     arp_results = []
 
@@ -75,11 +92,7 @@ def arp_monitor():
 
     return arp_results
 
-    # Convert the result to a string
-    tcp_output = "\n".join(tcp_result.show(dump=True))
-    return tcp_output
-
-#Scan Subnet Function
+#Subnet Scan
 def scan_subnet(subnet = getGateway()):
     #Define the network range to scan
     ip_range = subnet + "/24"
@@ -95,7 +108,18 @@ def scan_subnet(subnet = getGateway()):
     for sent, received in ans:
         live_hosts.append(received)
     return live_hosts
+
+#Malformed Packet
+def malformed_packet():
+    try:
+        # Attempt to send a malformed packet
+        send(IP(dst="10.1.1.5", ihl=2, version=3) / ICMP())
+        return "Successfully sent malformed packet"
+    except Exception as e:
+        # If an exception occurs while sending the packet, return a failure message
+        return f"Failed to send packet: {str(e)}"
     
+#Sniffer
 def sniffer(time,packetAmount=0):
     result = sniff(count=packetAmount,store=True,timeout=time)
     return result

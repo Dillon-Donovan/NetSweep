@@ -23,5 +23,7 @@ def dns_lookup(domain, dns_server="resolver1.opendns.com"):
     else:
         print("DNS query failed or no response received")
 
+    return dns_lookup("myip.opendns.com")
+
 # sends dns request to website for public IP
-dns_lookup("myip.opendns.com")
+#dns_lookup("myip.opendns.com")
