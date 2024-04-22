@@ -2,6 +2,7 @@ from scapy.all import *
 from sys import *
 from PyQt5 import *
 import subprocess
+import socket
 
 
 
@@ -25,10 +26,20 @@ def dns_lookup(domain="myip.opendns.com", dns_server="resolver1.opendns.com"):
     else:
         print("DNS query failed or no response received")
     return response
-    
+
 def getGateway():
     defaultGateway = conf.route.route("0.0.0.0")[2]
     return defaultGateway
+
+def icmp_ping(ipAddress = getGateway()):
+    pingOutput = []
+    try:
+        ans, unans = sr(IP(dst=ipAddress)/ICMP(), timeout=3, chainEX=True)
+    except:
+        return "Please enter valid IP address."
+    for sent, recieved in ans:
+        pingOutput.append(recieved)
+    return pingOutput
 
 def scan_subnet(subnet = getGateway()):
     #Define the network range to scan

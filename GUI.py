@@ -38,7 +38,7 @@ class NetSweepGUI(QWidget):
 
         #Creating and naming main display
         self.setWindowTitle("NetSweep")
-        self.setGeometry(100, 100, 600, 300)
+        self.setGeometry(400, 400, 1200, 650)
         layout = QVBoxLayout()
 
         #Creation of label for output box
@@ -51,8 +51,6 @@ class NetSweepGUI(QWidget):
         self.mainDisplay = QTextBrowser()
         self.cursor = self.mainDisplay.textCursor()
         self.mainDisplay.setOpenExternalLinks(True)
-        self.mainDisplay.setFixedHeight(400)
-        self.mainDisplay.setFixedWidth(1200)
         self.mainDisplay.setReadOnly(True)
         layout.addWidget(self.mainDisplay)
 
@@ -79,7 +77,9 @@ class MyTabWidget(QWidget):
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
-        self.tabs.resize(300,200)
+        self.tab1.setObjectName("tab1")
+        self.tab2.setObjectName("tab2")
+        #self.tabs.resize(300,200)
         
         #Add tabs
         self.tabs.addTab(self.tab1,"Tab 1")
@@ -94,6 +94,8 @@ class MyTabWidget(QWidget):
         self.tab1.layout.addWidget(self.sniffButton)
         self.sniffButton.clicked.connect(self.handle_sniffButton)
         self.layout.addWidget(self.sniffButton)
+        self.sniffButtonTime = QLineEdit()
+        self.tab1.layout.addWidget(self.sniffButtonTime)
 
         #Subnet button
         self.scanSubnetButton = QPushButton(self)
@@ -110,6 +112,32 @@ class MyTabWidget(QWidget):
         self.IpConfigButton.clicked.connect(lambda: self.parent().mainDisplay.insertPlainText(get_ipconfig()))
         self.IpConfigButton.clicked.connect(lambda: self.parent().set_mainDisplay("<br>" + "<div style=\"color:red\">+++++++++++++++++++++++++++++++++++++++++++++++++ End IpConfig +++++++++++++++++++++++++++++++++++++++++++++++++</div>" + "<br>"))
         self.layout.addWidget(self.IpConfigButton)
+
+        self.frame = QFrame(self)
+        self.frame.setObjectName("inputBox")
+        self.frame.setFixedHeight(115)
+        #ICMP Layout
+        self.inputLayout = QHBoxLayout()
+        self.togetherLayout = QVBoxLayout()
+        #ICMP Ping button
+        self.icmpPingButton = QPushButton(self)
+        self.icmpPingButton.setText("Ping Test")
+        self.icmpPingButton.clicked.connect(self.handle_pingButton)
+        self.togetherLayout.addWidget(self.icmpPingButton)
+        #ICMP Label
+        self.inputLabel = QLabel("Enter an IP address: ")
+        self.inputLayout.addWidget(self.inputLabel)
+        #ICMP input box
+        self.icmpPingButtonInput = QLineEdit(placeholderText = "(Blank = Default gateway)")
+        self.inputFont = self.icmpPingButtonInput.font()
+        self.inputFont.setItalic(True)
+        self.icmpPingButtonInput.setFont(self.inputFont)
+        self.inputLayout.addWidget(self.icmpPingButtonInput)
+        #Combining Layouts
+        self.togetherLayout.addLayout(self.inputLayout)
+        self.frame.setLayout(self.togetherLayout)
+        self.tab1.layout.addWidget(self.frame)
+        
 
         #Add tabs to widget
         self.tab1.setLayout(self.tab1.layout)
@@ -129,7 +157,32 @@ class MyTabWidget(QWidget):
         hosts = scan_subnet()
         formattedText = packet_group_to_string(hosts)
         return formattedText
+
+    def get_ping(self):
+        Output = icmp_ping(self.icmpPingButtonInput.text())
+        if isinstance(Output, str) == True:
+            return Output + "<br>"
+        else:
+            formattedText = packet_group_to_string(Output)
+            if not Output:
+                return "<div style=\"color:red;\">No response recieved from address: " + self.icmpPingButtonInput.text() + "<\div><br>"
+            return "<div style=\"color:green;\">Response recieved from address: " + self.icmpPingButtonInput.text() +"</div><br>" + formattedText
         
+    def handle_pingButton(self):
+        self.icmpPingButton.setText("(ICMP ping in progress...)")
+
+        worker = Worker(self.get_ping)
+        worker.signals.result.connect(lambda: self.parent().set_mainDisplay("<br>Ping results:<br>"))
+        worker.signals.result.connect(self.parent().set_mainDisplay)
+        worker.signals.finished.connect(lambda: self.icmpPingButton.setEnabled(True))
+        worker.signals.finished.connect(lambda: self.icmpPingButton.setStyleSheet(""))
+
+        #Start thread
+        self.parent().threadpool.start(worker)
+        self.icmpPingButton.setEnabled(False)
+        self.icmpPingButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
+        worker.signals.finished.connect(lambda: self.icmpPingButton.setText("Ping Test"))
+
     def handle_scanSubnetButton(self):
         
         #subnet = self.text_input.text()  # Get subnet from the text input
@@ -190,12 +243,12 @@ def HTML_summary(packet):
     #Extract and print the TCP layer
     if packet.haslayer(TCP):
         tcp_layer = packet[TCP]
-        layers.append(f"<b style=\"color:grey;\">TCP</b> <a style=\"color:#059efc\" href=https://www.speedguide.net/port.php?port={tcp_layer.sport}><i>{tcp_layer.sport}</a> > <a style=\"color:#059efc\" href=https://www.speedguide.net/port.php?port={tcp_layer.dport}>{tcp_layer.dport}</i></a>")
+        layers.append(f"<b style=\"color:grey;\">TCP</b> <a style=\"color:#059efc\" href=\"https://www.speedguide.net/port.php?port={tcp_layer.sport}\"><i>{tcp_layer.sport}</a> > <a style=\"color:#059efc\" href=\"https://www.speedguide.net/port.php?port={tcp_layer.dport}\">{tcp_layer.dport}</i></a>")
     
     #Extract and print the UDP layer
     if packet.haslayer(UDP):
         udp_layer = packet[UDP]
-        layers.append(f"<b style=\"color:grey;\">UDP</b> <a style=\"color:#059efc\" href=https://www.speedguide.net/port.php?port={udp_layer.sport}><i>{udp_layer.sport}</a> > <a style=\"color:#059efc\" href=https://www.speedguide.net/port.php?port={udp_layer.dport}>{udp_layer.dport}</i></a>")
+        layers.append(f"<b style=\"color:grey;\">UDP</b> <a style=\"color:#059efc\" href=\"https://www.speedguide.net/port.php?port={udp_layer.sport}\"><i>{udp_layer.sport}</a> > <a style=\"color:#059efc\" href=\"https://www.speedguide.net/port.php?port={udp_layer.dport}\">{udp_layer.dport}</i></a>")
     
     #Extract and print the ICMP layer
     if packet.haslayer(ICMP):

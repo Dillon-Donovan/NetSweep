@@ -36,3 +36,22 @@ QLabel {
     border: 2px solid black; 
     border-radius: 6px; 
 }
+
+QLineEdit {
+    border: 2px solid black; 
+    border-radius: 6px; 
+}
+
+QFrame#inputBox {
+    background-color: white;
+    border: 4px solid black; 
+    border-radius: 25px; 
+}
+
+QWidget#tab1 { 
+    background-color: #919191;
+}
+
+QWidget#tab2 { 
+    background-color: #919191;
+}
