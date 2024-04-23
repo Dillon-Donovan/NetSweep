@@ -43,7 +43,7 @@ class NetSweepGUI(QWidget):
 
         #Creation of label for output box
         self.topLayout = QHBoxLayout()
-        self.mainDisplayLabel = QLabel("Output window")
+        self.mainDisplayLabel = QLabel("  Output")
         self.mainDisplayLabel.setObjectName("OutputWindow")
         self.mainDisplayLabel.setFont(QFont('Arial', 13,-1,True))
         self.mainDisplayLabel.setFixedSize(125, 30)
