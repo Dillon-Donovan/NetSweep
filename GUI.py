@@ -38,14 +38,31 @@ class NetSweepGUI(QWidget):
 
         #Creating and naming main display
         self.setWindowTitle("NetSweep")
-        self.setGeometry(400, 400, 1200, 650)
+        self.setGeometry(400, 400, 1200, 800)
         layout = QVBoxLayout()
 
         #Creation of label for output box
+        self.topLayout = QHBoxLayout()
         self.mainDisplayLabel = QLabel("Output window")
+        self.mainDisplayLabel.setObjectName("OutputWindow")
         self.mainDisplayLabel.setFont(QFont('Arial', 13,-1,True))
-        self.mainDisplayLabel.setFixedWidth(125)
-        layout.addWidget(self.mainDisplayLabel)
+        self.mainDisplayLabel.setFixedSize(125, 30)
+        self.mainDisplayLabel.setAlignment(Qt.AlignLeft)
+        self.topLayout.addWidget(self.mainDisplayLabel)
+
+        #Creation of clear display button
+        self.clearMainDisplayButton = QPushButton(self)
+        self.clearMainDisplayButton.setObjectName("clearMainDisplayButton")
+        self.clearMainDisplayButton.pressed.connect(lambda: self.mainDisplay.clear())
+        self.clearMainDisplayButton.setIcon(QIcon('resetButton2.png'))
+        self.clearMainDisplayButton.setFixedSize(40, 40)
+        self.clearMainDisplayButton.setIconSize(QSize(28,28))
+        self.topLayout.addWidget(self.clearMainDisplayButton)
+
+        #Creation of spacer item
+        self.spacer = QSpacerItem(1200, 40, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.topLayout.addItem(self.spacer)
+        layout.addLayout(self.topLayout)
 
         #First text display widget
         self.mainDisplay = QTextBrowser()
@@ -82,27 +99,12 @@ class MyTabWidget(QWidget):
         #self.tabs.resize(300,200)
         
         #Add tabs
-        self.tabs.addTab(self.tab1,"Tab 1")
-        self.tabs.addTab(self.tab2,"Tab 2")
+        self.tabs.addTab(self.tab1,"Basic")
+        self.tabs.addTab(self.tab2,"Advanced")
         
         #Create first tab
         self.tab1.layout = QVBoxLayout(self)
-
-        #Sniff button
-        self.sniffButton = QPushButton(self)
-        self.sniffButton.setText("Start 3 second sniff")
-        self.tab1.layout.addWidget(self.sniffButton)
-        self.sniffButton.clicked.connect(self.handle_sniffButton)
-        self.layout.addWidget(self.sniffButton)
-        self.sniffButtonTime = QLineEdit()
-        self.tab1.layout.addWidget(self.sniffButtonTime)
-
-        #Subnet button
-        self.scanSubnetButton = QPushButton(self)
-        self.scanSubnetButton.setText("Scan subnet")
-        self.tab1.layout.addWidget(self.scanSubnetButton)
-        self.scanSubnetButton.clicked.connect(self.handle_scanSubnetButton)
-        self.layout.addWidget(self.scanSubnetButton)
+        self.tab2.layout = QVBoxLayout(self)
 
         #IpConfig button
         self.IpConfigButton = QPushButton(self)
@@ -113,10 +115,10 @@ class MyTabWidget(QWidget):
         self.IpConfigButton.clicked.connect(lambda: self.parent().set_mainDisplay("<br>" + "<div style=\"color:red\">+++++++++++++++++++++++++++++++++++++++++++++++++ End IpConfig +++++++++++++++++++++++++++++++++++++++++++++++++</div>" + "<br>"))
         self.layout.addWidget(self.IpConfigButton)
 
+        #ICMP Ping
         self.frame = QFrame(self)
         self.frame.setObjectName("inputBox")
         self.frame.setFixedHeight(115)
-
         #ICMP Layout
         self.inputLayout = QHBoxLayout()
         self.togetherLayout = QVBoxLayout()
@@ -134,22 +136,129 @@ class MyTabWidget(QWidget):
         self.inputFont.setItalic(True)
         self.icmpPingButtonInput.setFont(self.inputFont)
         self.inputLayout.addWidget(self.icmpPingButtonInput)
-
-
-        self.setLayout(self.layout)
-
         #Combining Layouts
         self.togetherLayout.addLayout(self.inputLayout)
         self.frame.setLayout(self.togetherLayout)
         self.tab1.layout.addWidget(self.frame)
-
         
+        #Scan subnet button
+        self.scanSubnetButton = QPushButton(self)
+        self.scanSubnetButton.setText("Scan subnet")
+        self.tab1.layout.addWidget(self.scanSubnetButton)
+        self.scanSubnetButton.clicked.connect(self.handle_scanSubnetButton)
+        self.layout.addWidget(self.scanSubnetButton)
+
+        #Sniff Button tab2
+        self.frame = QFrame(self)
+        self.frame.setObjectName("inputBox")
+        self.frame.setFixedHeight(115)
+        #Sniff Button Layout
+        self.inputLayout = QHBoxLayout()
+        self.togetherLayout = QVBoxLayout()
+        #Sniff Button
+        self.sniffButton = QPushButton(self)
+        self.sniffButton.setText("Execute Timed Sniff")
+        self.sniffButton.clicked.connect(self.handle_sniffButton)
+        self.togetherLayout.addWidget(self.sniffButton)
+        #Sniff Button Label
+        self.inputLabel = QLabel("Enter an integer for sniff time(seconds): ")
+        self.inputLayout.addWidget(self.inputLabel)
+        #Sniff Button input box
+        self.sniffButtonInput = QLineEdit(placeholderText = "(Blank = 3 seconds)")
+        self.inputFont = self.sniffButtonInput.font()
+        self.inputFont.setItalic(True)
+        self.sniffButtonInput.setFont(self.inputFont)
+        self.inputLayout.addWidget(self.sniffButtonInput)
+        #Combining Layouts
+        self.togetherLayout.addLayout(self.inputLayout)
+        self.frame.setLayout(self.togetherLayout)
+        self.tab2.layout.addWidget(self.frame)
+
+        #TCP Traceroute
+        self.frame = QFrame(self)
+        self.frame.setObjectName("inputBox")
+        self.frame.setFixedHeight(115)
+        #TCP Traceroute Layout
+        self.inputLayout = QHBoxLayout()
+        self.togetherLayout = QVBoxLayout()
+        #TCP Traceroute button
+        self.tcpTracerouteButton = QPushButton(self)
+        self.tcpTracerouteButton.setText("Run TCP Traceroute")
+        self.tcpTracerouteButton.clicked.connect(self.handle_tcpTraceroute)
+        self.togetherLayout.addWidget(self.tcpTracerouteButton)
+        #TCP Traceroute Label
+        self.inputLabel = QLabel("Enter an IP address or URL: ")
+        self.inputLayout.addWidget(self.inputLabel)
+        #TCP Traceroute input box
+        self.tcpTracerouteButtonInput = QLineEdit(placeholderText = "(Blank = www.google.com)")
+        self.inputFont = self.tcpTracerouteButtonInput.font()
+        self.inputFont.setItalic(True)
+        self.tcpTracerouteButtonInput.setFont(self.inputFont)
+        self.inputLayout.addWidget(self.tcpTracerouteButtonInput)
+        #Combining Layouts
+        self.togetherLayout.addLayout(self.inputLayout)
+        self.frame.setLayout(self.togetherLayout)
+        self.tab2.layout.addWidget(self.frame)
+
+        #DNS Request
+        self.frame = QFrame(self)
+        self.frame.setObjectName("inputBox")
+        self.frame.setFixedHeight(145)
+        #DNS Request Layout
+        self.inputLayout = QHBoxLayout()
+        self.radioButtonLayout = QHBoxLayout()
+        self.togetherLayout = QVBoxLayout()
+        #DNS Request button
+        self.dnsRequestButton = QPushButton(self)
+        self.dnsRequestButton.setText("Run DNS Request")
+        self.dnsRequestButton.clicked.connect(self.handle_dnsRequest)
+        self.togetherLayout.addWidget(self.dnsRequestButton)
+        #DNS Request Label
+        self.inputLabel = QLabel("Enter an IP address or URL: ")
+        self.inputLayout.addWidget(self.inputLabel)
+        #DNS Request input box
+        self.dnsRequestButtonInput = QLineEdit(placeholderText = "(Blank = www.google.com)")
+        self.inputFont = self.dnsRequestButtonInput.font()
+        self.inputFont.setItalic(True)
+        self.dnsRequestButtonInput.setFont(self.inputFont)
+        self.inputLayout.addWidget(self.dnsRequestButtonInput)
+        #DNS Request server selection radio buttons
+        self.dnsRequestRadioButtonLabel = QLabel("Select a DNS server: ")
+        self.dnsRequestRadioButtonLabel.setFixedWidth(115)
+        self.dnsRequestRadioButton1 = QRadioButton(self)
+        self.dnsRequestRadioButton1.setText("Cloudflare: 1.1.1.1")
+        self.dnsRequestRadioButton1.toggle()
+        self.dnsRequestRadioButton2 = QRadioButton(self)
+        self.dnsRequestRadioButton2.setText("Google: 8.8.8.8")
+        self.dnsRequestRadioButton3 = QRadioButton(self)
+        self.dnsRequestRadioButton3.setText("Quad9: 9.9.9.9")
+        self.dnsRequestRadioButton4 = QRadioButton(self)
+        self.dnsRequestRadioButton4.setText("Open DNS: 208.67.222.222")
+        self.radioButtonLayout.addWidget(self.dnsRequestRadioButtonLabel)
+        self.radioButtonLayout.addWidget(self.dnsRequestRadioButton1)
+        self.radioButtonLayout.addWidget(self.dnsRequestRadioButton2)
+        self.radioButtonLayout.addWidget(self.dnsRequestRadioButton3)
+        self.radioButtonLayout.addWidget(self.dnsRequestRadioButton4)
+        #Combining Layouts
+        self.togetherLayout.addLayout(self.inputLayout)
+        self.togetherLayout.addLayout(self.radioButtonLayout)
+        self.frame.setLayout(self.togetherLayout)
+        self.tab2.layout.addWidget(self.frame)
+
+        #Public IP button
+        self.publicIpButton = QPushButton(self)
+        self.publicIpButton.setText("Get my Public IP")
+        self.tab1.layout.addWidget(self.publicIpButton)
+        self.publicIpButton.clicked.connect(self.handle_publicIpButton)
+        self.layout.addWidget(self.publicIpButton)
 
         #Add tabs to widget
         self.tab1.setLayout(self.tab1.layout)
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
+        self.tab2.setLayout(self.tab2.layout)
 
+        
     def get_sniff(self):
         sniffedPackets = sniffer(3)
         formatedText = packet_group_to_string(sniffedPackets)
@@ -159,6 +268,10 @@ class MyTabWidget(QWidget):
         result = (summary + formatedText)
         return result
     
+    def get_public_ip(self):
+        IP = public_ip()
+        return IP + "<br>"
+
     def get_subnetScan(self):
         hosts = scan_subnet()
         formattedText = packet_group_to_string(hosts)
@@ -173,9 +286,65 @@ class MyTabWidget(QWidget):
             if not Output:
                 return "<div style=\"color:red;\">No response recieved from address: " + self.icmpPingButtonInput.text() + "<\div><br>"
             return "<div style=\"color:green;\">Response recieved from address: " + self.icmpPingButtonInput.text() +"</div><br>" + formattedText
+
+    def get_tcp_traceroute(self):
+        route = tcp_traceroute(default = self.tcpTracerouteButtonInput.text())
+        routeOutput = packet_group_to_string_traceroute(route)
+        return routeOutput
+    
+    def get_dns_request(self):
+        if len(self.dnsRequestButtonInput.text()) > 0:
+            domain = self.dnsRequestButtonInput.text()
+        else:
+            domain = "www.google.com"
+        if self.dnsRequestRadioButton1.isChecked() == True:
+            dns_server = "1.1.1.1"
+            self.parent().set_mainDisplay("<br>DNS Request: <div style=\"color:#9b4dfa\">(DNS Server = "+ self.dnsRequestRadioButton1.text() +" ; Domain = " + domain + ")<br>")
+        if self.dnsRequestRadioButton2.isChecked() == True:
+            dns_server = "8.8.8.8"
+            self.parent().set_mainDisplay("<br>DNS Request: <div style=\"color:#9b4dfa\">(DNS Server = "+ self.dnsRequestRadioButton2.text() +" ; Domain = " + domain + ")<br>")
+        if self.dnsRequestRadioButton3.isChecked() == True:
+            dns_server = "9.9.9.9"
+            self.parent().set_mainDisplay("<br>DNS Request: <div style=\"color:#9b4dfa\">(DNS Server = "+ self.dnsRequestRadioButton3.text() +" ; Domain = " + domain + ")<br>")
+        if self.dnsRequestRadioButton4.isChecked() == True:
+            dns_server = "208.67.222.222"
+            self.parent().set_mainDisplay("<br>DNS Request: <div style=\"color:#9b4dfa\">(DNS Server = "+ self.dnsRequestRadioButton4.text() +" ; Domain = " + domain + ")<br>")
+        route = public_ip(domain, dns_server)
+        if route == "Error parsing domain":
+            return "<div style=\"color:red\">Error parsing domain</div><br>"
+        return "<b style=\"color:grey;\">Resolved IP = </b> <a style=\"color:orange;\" href=https://iplocation.io/ip/" + route + ">" + route + "<br>"
         
+    def handle_dnsRequest(self):
+        self.dnsRequestButton.setText("(Sending DNS request...)")
+
+        worker = Worker(self.get_dns_request)
+        worker.signals.result.connect(self.parent().set_mainDisplay)
+        worker.signals.finished.connect(lambda: self.dnsRequestButton.setEnabled(True))
+        worker.signals.finished.connect(lambda: self.dnsRequestButton.setStyleSheet(""))
+
+        #Start thread
+        self.parent().threadpool.start(worker)
+        self.dnsRequestButton.setEnabled(False)
+        self.dnsRequestButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
+        worker.signals.finished.connect(lambda: self.dnsRequestButton.setText("Run DNS request"))
+
+    def handle_tcpTraceroute(self):
+        self.tcpTracerouteButton.setText("(Tracing TCP packet route...)")
+
+        worker = Worker(self.get_tcp_traceroute)
+        worker.signals.result.connect(lambda: self.parent().set_mainDisplay("<br>TCP Traceroute results: <br>"))
+        worker.signals.result.connect(self.parent().set_mainDisplay)
+        worker.signals.finished.connect(lambda: self.tcpTracerouteButton.setEnabled(True))
+        worker.signals.finished.connect(lambda: self.tcpTracerouteButton.setStyleSheet(""))
+
+        #Start thread
+        self.parent().threadpool.start(worker)
+        self.tcpTracerouteButton.setEnabled(False)
+        self.tcpTracerouteButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
+        worker.signals.finished.connect(lambda: self.tcpTracerouteButton.setText("Run TCP Traceroute"))
+
     def handle_pingButton(self):
-        self.icmpPingButton.setText("(ICMP ping in progress...)")
+        self.icmpPingButton.setText("(Running ICMP ping...)")
 
         worker = Worker(self.get_ping)
         worker.signals.result.connect(lambda: self.parent().set_mainDisplay("<br>Ping results:<br>"))
@@ -189,11 +358,21 @@ class MyTabWidget(QWidget):
         self.icmpPingButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
         worker.signals.finished.connect(lambda: self.icmpPingButton.setText("Ping Test"))
 
+    def handle_publicIpButton(self):
+        
+        self.publicIpButton.setText("(Retrieving Public IP...)")
+        
+        worker = Worker(self.get_public_ip)
+        worker.signals.result.connect(lambda: self.parent().set_mainDisplay("<br>Your public IP is: "))
+        worker.signals.result.connect(self.parent().set_mainDisplay)
+        worker.signals.finished.connect(lambda: self.publicIpButton.setEnabled(True))
+        worker.signals.finished.connect(lambda: self.publicIpButton.setStyleSheet(""))
+
         #Start thread
         self.parent().threadpool.start(worker)
-        self.icmpPingButton.setEnabled(False)
-        self.icmpPingButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
-        worker.signals.finished.connect(lambda: self.icmpPingButton.setText("Ping Test"))
+        self.publicIpButton.setEnabled(False)
+        self.publicIpButton.setStyleSheet("background-color: #253626; border: 3px solid Yellow")
+        worker.signals.finished.connect(lambda: self.publicIpButton.setText("Get my Public IP"))
 
     def handle_scanSubnetButton(self):
         
@@ -237,6 +416,15 @@ def packet_group_to_string(packetGroup):
     for packet in packetGroup:
         count = count + 1
         string = string + "<num style=\"color:red;font-style:italic;\">" + str(count) + "&nbsp;&nbsp;</num>" +  str(HTML_summary(packet))  + "<br>"
+    return string
+
+#Special version for TCP traceroute
+def packet_group_to_string_traceroute(packetGroup):
+    string =""
+    count = 0
+    for packet in packetGroup:
+        count = count + 1
+        string = string + "<num style=\"color:red;font-style:italic;\">Hop " + str(count) + "&nbsp;&nbsp;</num>" +  str(HTML_summary(packet))  + "<br>"
     return string
 
 #Function to format the packets for best output to QTextBrowser

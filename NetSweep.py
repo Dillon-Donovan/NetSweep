@@ -11,7 +11,7 @@ import socket
 #print(ans.an[0].rdata)
 
 #For troubleshooting misconfigurations with DNS and DNS cache poisoning attacks
-def dns_lookup(domain="myip.opendns.com", dns_server="resolver1.opendns.com", timeout = 10):
+def dns_lookup(domain, dns_server="resolver1.opendns.com", timeout = 10):
     #Create DNS query packet
     query_packet = IP(dst=dns_server) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=domain))
 
@@ -30,18 +30,25 @@ def dns_lookup(domain="myip.opendns.com", dns_server="resolver1.opendns.com", ti
 #Public IP function
 def public_ip(domain = "myip.opendns.com", dns_server="resolver1.opendns.com", timeout=10):
     # Create DNS query packet
-    query_packet = IP(dst=dns_server) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=domain))
+    try:
+        if domain == "myip.opendns.com":
+            query_packet = IP(dst=dns_server) / UDP(dport=53) / DNS(rd=1, qd=DNSQR(qname=domain))
+        else:
+            query_packet = IP(dst="1.1.1.1") / UDP() / DNS(rd=1, qd=DNSQR(qname=domain))
 
-    # Send DNS query and receive response with a timeout
-    response = sr1(query_packet, timeout=timeout, verbose=False)
+        # Send DNS query and receive response with a timeout
+        response = sr1(query_packet, timeout=timeout, verbose=False)
 
-    # Processing response
-    if response and response.haslayer(DNS):
-        for answer in response[DNS].an:
-            if answer.type == 1:  # IPv4 address record
-                return answer.rdata
-    else:
-        return None
+        # Processing response
+        if response and response.haslayer(DNS):
+            for answer in response[DNS].an:
+                if answer.type == 1:  # IPv4 address record
+                    return answer.rdata
+        else:
+            return "No response recieved"
+    except:
+        return "Error parsing domain"
+
 
 def getGateway():
     defaultGateway = conf.route.route("0.0.0.0")[2]
@@ -58,19 +65,25 @@ def icmp_ping(ipAddress = getGateway()):
     return pingOutput
 
 def tcp_traceroute(default="www.google.com"):
-    try:
+    #try:
+        tcp_packets = []
         # Perform traceroute
         tcp_result, _ = traceroute(default, maxttl=20, l4=TCP(sport=RandShort()))
-
+        for sent, received in tcp_result:
+            tcp_packets.append(received)
+        return tcp_packets
+        #return tcp_result
         # Format the traceroute results into a string
-        tcp_output = ""
-        for _, result in tcp_result:
-            ip = result[IP].src
-            tcp_output += f"Hop: {ip}\n"
+        
+        #tcp_output = ""
+        #for _, result in tcp_result:
+        #    ip = result[IP].src
+        #    tcp_output += f"Hop: {ip}\n"
 
-        return tcp_output
-    except Exception as e:
-        return f"Error: {str(e)}"
+        #return tcp_output
+    #except Exception as e:
+        #return f"Error: {str(e)}"
+        
 
 # ARP Monitor uses two functions, one extra for callback
 def arp_monitor():
