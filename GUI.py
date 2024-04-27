@@ -55,7 +55,7 @@ class NetSweepGUI(QWidget):
         self.clearMainDisplayButton = QPushButton(self)
         self.clearMainDisplayButton.setObjectName("clearMainDisplayButton")
         self.clearMainDisplayButton.pressed.connect(lambda: self.mainDisplay.clear())
-        self.clearMainDisplayButton.setIcon(QIcon('resetButton2.png'))
+        self.clearMainDisplayButton.setIcon(QIcon('resetButton2'))
         self.clearMainDisplayButton.setFixedSize(40, 40)
         self.clearMainDisplayButton.setIconSize(QSize(28,28))
         self.topLayout.addWidget(self.clearMainDisplayButton)
